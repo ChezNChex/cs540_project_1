@@ -47,48 +47,14 @@ const sjfAnimation = (processes, updateChart) => {
     fifoAnimation(sjf, updateChart);
 };
 
-/*
- TODO:
-    FIX STCF ALGORITHM
-    do something about mlfq idk gl ig
-    finish up and ggs
- */
+
 
 // STCF Algorithm with Animation
 const stcfAnimation = (processes, updateChart) => {
- let currentTime = 0, completed = 0, stcf = [], running = 0;
     let queue = [...processes];
-    queue = queue.sort((a, b) => (a.arrivalTime - b.arrivalTime));
-//    let currentProcess = queue.shift(), doneProcess = currentProcess, next = [];
-    /*
- while (completed < processes.length) {
-     if ((currentProcess.burstTime > 0) && currentProcess.arrivalTime >= currentTime) {
-         ++running;
-         --currentProcess.burstTime;
-     } else if ((currentProcess.burstTime == 0) && (currentProcess.completionTime == -1)) {
-         currentProcess.completionTime = currentTime;
-         ++completed;
-     }
-     if (currentTime >= queue[0].arrivalTime) {
-         next.push(queue.shift());
-         next = next.sort((a, b) => a.burstTime - b.burstTime);
-     }
-     for (let i = 0; i < next.length; i++) {
-         if (next[i].burstTime < currentProcess.burstTime) {
-             next.push(currentProcess);
-             doneProcess = currentProcess;
-             doneProcess.burstTime = running;
-             stcf.push(doneProcess);
-             currentProcess = next.shift();
-             running = 0;
-             break
-         }
-     ++currentTime;
-     }
- }
-     */
-//    fifoAnimation(stcf, updateChart);
-        fifoAnimation(queue, updateChart);
+    queue = queue.sort((a, b) => ((a.arrivalTime + a.burstTime) - (b.arrivalTime + b.burstTime)));
+
+    fifoAnimation(queue, updateChart);
 };
 
  // RR Algorithm with Animation
@@ -110,13 +76,28 @@ const stcfAnimation = (processes, updateChart) => {
  }
      fifoAnimation(rr, updateChart);
  };
- /*
+ 
  // MLFQ Algorithm with Animation
- const mlfqAnimation = (processes, updateChart) => {
-   let mlfq = processes.sort((a, b) => a.burstTime - b.burstTime);
-     fifoAnimation(sjf, updateChart);
+ const mlfqAnimation = (processes, timeQuantum, updateChart) => {
+     let queue = [...processes], currentTime = 0, mlfq = [];
+//     let priority = {priorityId: [1, 2, 3, 4, 5], process = []}
+     while (queue.length > 0) {
+         let currentProcess = queue.shift();
+         
+         if (currentProcess.burstTime > timeQuantum) {
+             currentProcess.burstTime -= timeQuantum;
+             currentTime += timeQuantum;
+             queue.push(currentProcess);
+             mlfq.push(currentProcess);
+         } else {
+             currentTime += currentProcess.burstTime;
+             currentProcess.completionTime = currentTime;
+             mlfq.push(currentProcess);
+         }
+     }
+     fifoAnimation(mlfq, updateChart);
  };
-*/
+
 
 
 const CpuSchedulerApp = () => {
@@ -188,7 +169,9 @@ const CpuSchedulerApp = () => {
       if (algorithm === 'RR') {
           rrAnimation(processes, timeQuantum, updateChart);
       }
-    // Add other algorithms as needed (SJF, RR, etc.)
+      if (algorithm === 'MLFQ') {
+          mlfqAnimation(processes, timeQuantum, updateChart);
+      }
   };
 
   return (
@@ -234,11 +217,11 @@ const CpuSchedulerApp = () => {
           </div>
           
       <div>
-        <button onClick={() => handleRunAlgorithm('FIFO')}>Run FIFO</button>
-          <button onClick={() => handleRunAlgorithm('SJF')}>Run SJF</button>
-          <button onClick={() => handleRunAlgorithm('STCF')}>Run STCF</button>
-          <button onClick={() => handleRunAlgorithm('RR')}>Run RR</button>
-        {/* Add buttons for other algorithms */}
+        <p><button onClick={() => handleRunAlgorithm('FIFO')}>Run FIFO</button></p>
+          <p><button onClick={() => handleRunAlgorithm('SJF')}>Run SJF</button></p>
+          <p><button onClick={() => handleRunAlgorithm('STCF')}>Run STCF</button></p>
+          <p><button onClick={() => handleRunAlgorithm('RR')}>Run RR</button></p>
+          <p><button onClick={() => handleRunAlgorithm('MLFQ')}>Run MLFQ</button></p>
       </div>
           
           
